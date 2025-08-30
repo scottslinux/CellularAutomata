@@ -27,12 +27,12 @@ Automata::Automata()
     baserect.setSize({cellside,cellside});
     baserect.setFillColor(sf::Color::Transparent);
     baserect.setOutlineColor(sf::Color::Green);
-    baserect.setOutlineThickness(1);
+    baserect.setOutlineThickness(0);
 
     solid.setSize({cellside,cellside});
     solid.setFillColor(sf::Color(0,200,100,100));
     solid.setOutlineColor(sf::Color(255,0,0,100));
-    solid.setOutlineThickness(1);
+    solid.setOutlineThickness(0);
 
     
 
@@ -43,15 +43,18 @@ Automata::Automata()
 
 }
 //================================================
-void Automata::update(sf::RenderWindow* window)
+void Automata::update(sf::RenderWindow& window)
 {
+    
+
     mouseAction(window);
     iterator();
 
+    
 }
 
 //================================================
-void Automata::draw(sf::RenderWindow* window)
+void Automata::draw(sf::RenderWindow& window)
 {
     drawGrid(window);
 
@@ -69,20 +72,20 @@ Automata::~Automata()
 
 }
 //================================================
-void Automata::drawGrid(sf::RenderWindow* window)
+void Automata::drawGrid(sf::RenderWindow& window)
 {
-    int offset=100;
 
-    for (int y=0;y<celldimension;y++)     // draws the raw grid which is immediately covered by solid rec with outline
+ /*  for (int y=0;y<celldimension;y++)     // draws the raw grid which is immediately covered by solid rec with outline
         for (int x=0;x<celldimension;x++)
             {
                 baserect.setPosition({x*cellside,y*cellside});
                 baserect.setOutlineColor(sf::Color(255,0,0,255));
-                window->draw(baserect);
+                window.draw(baserect);
+                
 
 
             }
-
+*/
     
 
     for(int i=0;i<totalcells;i++)   //iterate and color the cells appropriately
@@ -119,7 +122,7 @@ void Automata::drawGrid(sf::RenderWindow* window)
                 break;
         }
 
-        window->draw(solid);    
+        window.draw(solid);    
 
     }
 
@@ -127,14 +130,14 @@ void Automata::drawGrid(sf::RenderWindow* window)
 
 }
 //================================================
-void Automata::mouseAction(sf::RenderWindow* window)
+void Automata::mouseAction(sf::RenderWindow& window)
 {
-    sf::Vector2i mousepos=sf::Mouse::getPosition(*window);
+    sf::Vector2i mousepos=sf::Mouse::getPosition(window);
 
     cellx=(int)(mousepos.x/cellside);   //was creating mouse cursor ?needed
     celly=(int) (mousepos.y/cellside);
 
-    solid.setPosition({cellx*cellside,celly*cellside});
+   // solid.setPosition({cellx*cellside,celly*cellside});
 
     
     int gridmember=gridXY2index({cellx,celly});
@@ -159,22 +162,40 @@ void Automata::mouseAction(sf::RenderWindow* window)
 //================================================
 void Automata::iterator()
 {   
-    //iterate from the bottom row to the top
-    for (int y=celldimension;y>0;y--)
+    //iterate from the top row to the top
+    for (int y = celldimension - 1; y >= 0; --y)
         for (int x=0;x<celldimension;x++)
         {
-            if(Grid[gridXY2index({x,y})]==cellint::sand)  //convert xy to index and check contents
+
+
+            if(Grid[gridXY2index({x,y})]==cellint::sand&& (y!=celldimension-1)&&
+                    Grid[gridXY2index({x,y+1})]!=cellint::sand&&
+                    Grid[gridXY2index({x,y+1})]!=cellint::rock)  //convert xy to index and check contents
                 {
-                    //Grid[gridXY2index({x,y})]=cellint::empty;
-                    Grid[gridXY2index({x,y+1})]==cellint::sand;
+                    Grid[gridXY2index({x,y})]=cellint::empty;
+                    Grid[gridXY2index({x,y+1})]=cellint::sand;  //drop down one
+                    continue;
                 }
+                else
+                    if(Grid[gridXY2index({x,y})]==cellint::sand&& (y!=celldimension-1)&&
+                    Grid[gridXY2index({x-1,y+1})]!=cellint::sand&&
+                    Grid[gridXY2index({x,y+1})]!=cellint::rock)  //convert xy to index and check contents
+                        {
+                            Grid[gridXY2index({x,y})]=cellint::empty;
+                            Grid[gridXY2index({x-1,y+1})]=cellint::sand;  //drop down one
+                            continue;
+                        }
+                    else
+                        if(Grid[gridXY2index({x,y})]==cellint::sand&& (y!=celldimension-1)&&
+                            Grid[gridXY2index({x+1,y+1})]!=cellint::sand&&
+                            Grid[gridXY2index({x,y+1})]!=cellint::rock)  //convert xy to index and check contents
+                            {
+                                Grid[gridXY2index({x,y})]=cellint::empty;
+                                Grid[gridXY2index({x+1,y+1})]=cellint::sand;  //drop down one
+                                continue;
+                            }
 
-
-
-
-
-
-
+        
 
         }
 
@@ -188,7 +209,7 @@ void Automata::iterator()
 int Automata::gridXY2index(sf::Vector2f gridXY)
 {
 
-    int gridmember=celly*celldimension+ cellx;
+    int gridmember=gridXY.y*celldimension+ gridXY.x;
 
     return {gridmember};
 

@@ -34,8 +34,8 @@ int main()
 
         screen.clear(sf::Color::Black); //clear to black
 
-        Sandbox.update(&screen);
-        Sandbox.draw(&screen);  //send window handle to class
+        Sandbox.update(screen);
+        Sandbox.draw(screen);  //send window handle to class
 
 
 
